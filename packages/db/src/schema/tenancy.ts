@@ -80,6 +80,24 @@ export const sessions = pgTable("sessions", {
 }, (t) => [index("sessions_user_idx").on(t.userId), index("sessions_expiry_idx").on(t.expiresAt)]);
 
 /**
+ * Fixed-window counters for pre-authentication endpoints.
+ *
+ * In Postgres rather than in process memory because the limit has to hold across
+ * however many instances are running — an in-memory counter multiplies the real
+ * limit by the replica count, which is the same as not having one. Redis would
+ * also work, but nothing else here needs Redis and an optional dependency that
+ * silently disables a security control is worse than a table.
+ *
+ * The key is already an opaque hash when it derives from an email address, so
+ * this table cannot be read to enumerate who has an account.
+ */
+export const rateLimits = pgTable("rate_limits", {
+  key: text("key").primaryKey(),
+  attempts: integer("attempts").notNull().default(0),
+  windowStart: timestamp("window_start", { withTimezone: true }).notNull().defaultNow(),
+}, (t) => [index("rate_limits_window_idx").on(t.windowStart)]);
+
+/**
  * The credential vault.
  *
  * AES-256-GCM. Ciphertext, IV and auth tag are stored in separate columns so a

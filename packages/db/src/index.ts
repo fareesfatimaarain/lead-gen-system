@@ -1,5 +1,6 @@
 export * from "./client";
 export * from "./crypto";
+export * from "./rate-limit";
 export * as schema from "./schema/index";
 export { ORG_SCOPED_TABLES } from "./schema/index";
 

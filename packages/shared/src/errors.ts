@@ -60,6 +60,24 @@ export const validationFailed = (m: string, details?: unknown) =>
   new AppError("validation_failed", m, { details });
 
 /**
+ * Too many attempts. `retryAfterSeconds` is in `details` so an API route can put
+ * it in a Retry-After header, and it is in the message because a user who is
+ * locked out needs to know how long for, not just that they are.
+ */
+export const rateLimited = (retryAfterSeconds: number, what = "attempts") =>
+  new AppError(
+    "rate_limited",
+    `Too many ${what}. Try again in ${formatWait(retryAfterSeconds)}.`,
+    { details: { retryAfterSeconds } },
+  );
+
+function formatWait(seconds: number): string {
+  if (seconds < 60) return `${Math.max(1, Math.ceil(seconds))} seconds`;
+  const minutes = Math.ceil(seconds / 60);
+  return minutes === 1 ? "a minute" : `${minutes} minutes`;
+}
+
+/**
  * A provider call failed. `provider` and `hint` are surfaced verbatim in the
  * Connections page, so the hint must be actionable — name the setting to change,
  * not the exception that was thrown.

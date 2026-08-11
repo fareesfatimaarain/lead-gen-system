@@ -1,8 +1,10 @@
 import "server-only";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import {
   and,
+  clearRateLimit,
+  consumeRateLimit,
   db,
   eq,
   gt,
@@ -14,7 +16,7 @@ import {
   verifyPassword,
   withUser,
 } from "@outreach/db";
-import { conflict, forbidden, unauthenticated, validationFailed } from "@outreach/shared";
+import { conflict, forbidden, rateLimited, unauthenticated, validationFailed } from "@outreach/shared";
 import type { Capability, OrgRole } from "@outreach/shared";
 import { can } from "@outreach/shared";
 
@@ -29,6 +31,42 @@ import { can } from "@outreach/shared";
 
 const COOKIE_NAME = "outreach_session";
 const SESSION_TTL_DAYS = 30;
+
+/**
+ * Sign-in is limited twice over, and both limits are needed.
+ *
+ * Per-account stops someone grinding one victim's password from a rotating pool
+ * of addresses. Per-address stops credential stuffing, where each guess is
+ * against a different account so the per-account counter never rises. The
+ * per-address limit is the looser of the two because a shared office NAT puts
+ * real colleagues behind one address.
+ */
+const SIGN_IN_PER_ACCOUNT = { limit: 5, windowSeconds: 900 };
+const SIGN_IN_PER_ADDRESS = { limit: 30, windowSeconds: 900 };
+/** Sign-up creates rows, so it is limited by address only — there is no account yet. */
+const SIGN_UP_PER_ADDRESS = { limit: 5, windowSeconds: 3600 };
+
+/**
+ * The caller's address, for rate-limit keying only.
+ *
+ * Behind a proxy the socket address is the proxy, so x-forwarded-for is the only
+ * signal available — and it is client-settable, which is why this is never used
+ * for authorization. The leftmost entry is the original client; a spoofed one
+ * only lets an attacker choose which bucket to exhaust, and the per-account
+ * limit still holds.
+ */
+async function callerAddress(): Promise<string> {
+  const h = await headers();
+  const forwarded = h.get("x-forwarded-for");
+  const first = forwarded?.split(",")[0]?.trim();
+  return first || h.get("x-real-ip") || "unknown";
+}
+
+/** Throws if the attempt is over the limit. */
+async function enforceLimit(key: string, policy: { limit: number; windowSeconds: number }, what: string) {
+  const result = await consumeRateLimit({ key, ...policy });
+  if (!result.allowed) throw rateLimited(result.retryAfterSeconds, what);
+}
 
 export interface SessionContext {
   userId: string;
@@ -176,6 +214,8 @@ export async function signUp(input: {
   orgName: string;
 }): Promise<void> {
   const email = input.email.trim().toLowerCase();
+  await enforceLimit(`signup:ip:${await callerAddress()}`, SIGN_UP_PER_ADDRESS, "sign-up attempts");
+
   if (input.password.length < 12) {
     throw validationFailed("Use a password of at least 12 characters.");
   }
@@ -218,6 +258,13 @@ export async function signUp(input: {
 
 export async function signIn(email: string, password: string): Promise<void> {
   const normalized = email.trim().toLowerCase();
+  const accountKey = `signin:email:${normalized}`;
+
+  // Counted before the password is checked, not after a failure: an attempt that
+  // is never recorded is an attempt that is never limited, and a crash between
+  // the check and the increment would leave the guess free.
+  await enforceLimit(`signin:ip:${await callerAddress()}`, SIGN_IN_PER_ADDRESS, "sign-in attempts");
+  await enforceLimit(accountKey, SIGN_IN_PER_ACCOUNT, "sign-in attempts for this account");
 
   const rows = await db()
     .select({ id: schema.users.id, passwordHash: schema.users.passwordHash })
@@ -244,6 +291,9 @@ export async function signIn(email: string, password: string): Promise<void> {
     throw forbidden("This account is not a member of any workspace yet. Ask an owner to invite you.");
   }
 
+  // Only the per-account counter is cleared. The per-address one stays, so one
+  // valid login among many failures does not reset a stuffing run's budget.
+  await clearRateLimit(accountKey);
   await db().update(schema.users).set({ lastLoginAt: new Date() }).where(eq(schema.users.id, user.id));
   await issueSession(user.id, orgId);
 }

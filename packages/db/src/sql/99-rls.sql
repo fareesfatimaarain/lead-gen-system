@@ -91,6 +91,12 @@ ALTER TABLE public.users DISABLE ROW LEVEL SECURITY;
 ALTER TABLE public.org_members DISABLE ROW LEVEL SECURITY;
 ALTER TABLE public.sessions DISABLE ROW LEVEL SECURITY;
 
+-- rate_limits is the same kind of exception for the same reason: it counts
+-- attempts against sign-in and sign-up, which happen before any org is known,
+-- so there is no claim for a policy to resolve. It holds no org_id and no
+-- customer data — only a SHA-256 of the subject and a counter.
+ALTER TABLE public.rate_limits DISABLE ROW LEVEL SECURITY;
+
 DROP POLICY IF EXISTS orgs_member_read ON public.orgs;
 DROP POLICY IF EXISTS users_self_or_coworker ON public.users;
 DROP POLICY IF EXISTS org_members_same_org ON public.org_members;

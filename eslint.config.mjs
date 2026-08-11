@@ -39,6 +39,15 @@ export default tseslint.config(
   ...nextPlugin.map((config) => ({ ...config, files: ["apps/web/**/*.{ts,tsx}"] })),
 
   {
+    files: ["apps/web/**/*.{ts,tsx}"],
+    rules: {
+      // A pages-router rule. It cannot find a pages/ directory because this is
+      // an app-router project, and it warns about that on every run.
+      "@next/next/no-html-link-for-pages": "off",
+    },
+  },
+
+  {
     files: ["**/*.{ts,tsx}"],
     rules: {
       // An unused parameter is often a signature being honoured rather than a

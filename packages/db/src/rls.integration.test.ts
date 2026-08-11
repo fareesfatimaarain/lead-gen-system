@@ -18,6 +18,23 @@ import * as schema from "./schema/index";
 const HAS_DB = Boolean(process.env.DATABASE_URL);
 const suite = HAS_DB ? describe : describe.skip;
 
+/**
+ * Every message in an error's cause chain.
+ *
+ * Drizzle raises its own error and hangs the driver's underneath, so the
+ * Postgres text is not on the message we are handed. Matching the whole chain
+ * keeps these assertions pinned to *why* a write was refused: a statement
+ * rejected for some unrelated reason would otherwise satisfy a bare `toThrow`
+ * and hide a genuine hole.
+ */
+function causeChain(error: unknown): string {
+  const messages: string[] = [];
+  for (let e = error, depth = 0; e instanceof Error && depth < 5; e = e.cause, depth++) {
+    messages.push(e.message);
+  }
+  return messages.join(" | ");
+}
+
 suite("row-level security", () => {
   let orgA: string;
   let orgB: string;
@@ -134,17 +151,21 @@ suite("row-level security", () => {
   it("refuses to let a tenant write a global suppression", async () => {
     // Global rows are national DNC lists and platform-wide opt-outs. A tenant
     // that could write one could suppress a competitor's prospects everywhere.
-    await expect(
-      withOrg({ orgId: orgA }, (tx) =>
-        tx.insert(schema.suppressions).values({
-          orgId: null,
-          scope: "global",
-          kind: "email",
-          value: `escalation-${Date.now()}@example.com`,
-          reason: "should be rejected",
-        }),
-      ),
-    ).rejects.toThrow(/row-level security/i);
+    const refusal = await withOrg({ orgId: orgA }, (tx) =>
+      tx.insert(schema.suppressions).values({
+        orgId: null,
+        scope: "global",
+        kind: "email",
+        value: `escalation-${Date.now()}@example.com`,
+        reason: "should be rejected",
+      }),
+    ).then(
+      () => null,
+      (error: unknown) => error,
+    );
+
+    expect(refusal, "the global suppression write was allowed").not.toBeNull();
+    expect(causeChain(refusal)).toMatch(/row-level security/i);
   });
 
   it("lets every org see global suppressions but not each other's", async () => {

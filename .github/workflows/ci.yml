@@ -1,0 +1,139 @@
+name: CI
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+
+concurrency:
+  # A new push makes the in-flight run's answer obsolete, so cancel it rather
+  # than paying for both.
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: Typecheck, lint and test
+    runs-on: ubuntu-latest
+
+    # A real Postgres, because the tests that matter most cannot run without
+    # one. `rls.integration.test.ts` is what proves tenant isolation is enforced
+    # by the database rather than by every query remembering its WHERE clause,
+    # and it self-skips when DATABASE_URL is unset — so a CI job with no
+    # database would report green while testing none of it.
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: outreach
+          POSTGRES_PASSWORD: outreach_dev
+          POSTGRES_DB: outreach
+        ports:
+          - 5455:5432
+        options: >-
+          --health-cmd "pg_isready -U outreach -d outreach"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      APP_DB_PASSWORD: outreach_app_dev
+      DATABASE_URL: postgresql://outreach_app:outreach_app_dev@localhost:5455/outreach
+      DATABASE_ADMIN_URL: postgresql://outreach:outreach_dev@localhost:5455/outreach
+      # Throwaway key for the vault tests. Real deployments supply their own;
+      # rotating it makes every stored credential undecryptable.
+      CREDENTIAL_ENCRYPTION_KEY: 5Kx1cVQdPZ0mQ3sT7yLdN2rH8wJfB6uA4eG9pC1vX0k=
+      SESSION_SECRET: hV2nR8qLzT4mY6bK1sD9wF3jP7xC5aE0uG8iO2rN4tQ=
+      NEXT_TELEMETRY_DISABLED: "1"
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Apply migrations
+        # Creates the schema and the unprivileged app role. The runner aborts if
+        # that role ends up with BYPASSRLS, which would make the isolation tests
+        # pass while proving nothing.
+        run: npm run db:migrate
+
+      - run: npm run typecheck
+
+      - run: npm run lint
+
+      - name: Test
+        run: npm test -- --reporter=default --reporter=json --outputFile=test-results.json
+
+      - name: Assert the integration suites actually ran
+        # A guard against the failure this whole job is designed to avoid: the
+        # integration tests skip themselves when DATABASE_URL is missing, so a
+        # broken service container would turn them into silent no-ops.
+        run: |
+          node -e "
+            const r = require('./test-results.json');
+            const names = r.testResults.map(t => t.name).join(' ');
+            for (const f of ['rls.integration', 'vault.integration', 'rate-limit.integration']) {
+              if (!names.includes(f)) {
+                console.error('Integration suite did not run: ' + f);
+                process.exit(1);
+              }
+            }
+            const skipped = r.numPendingTests ?? 0;
+            if (skipped > 0) {
+              console.error(skipped + ' test(s) were skipped — expected none with a database present');
+              process.exit(1);
+            }
+            console.log('All ' + r.numTotalTests + ' tests ran, none skipped.');
+          "
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      # No database. The build must not need one — a page that queries at build
+      # time would fail here, which is the point.
+      - run: npm run build
+        env:
+          NEXT_TELEMETRY_DISABLED: "1"
+
+  docker:
+    name: Docker images
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/setup-buildx-action@v3
+
+      # Built, not pushed. This catches a Dockerfile that has drifted from the
+      # workspace layout before a deploy does.
+      - name: Build web image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          target: web
+          push: false
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build worker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          target: worker
+          push: false
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

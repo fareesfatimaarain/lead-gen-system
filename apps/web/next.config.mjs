@@ -33,6 +33,13 @@ loadRootEnv();
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  // Emit a self-contained server with only the files actually reached. The
+  // container then carries no npm tree at all, which is both a smaller image
+  // and a smaller surface — build tooling never ships to production.
+  output: "standalone",
+  // The traced root is the monorepo, not this app: the workspace packages live
+  // above it and are symlinked in, and Next would otherwise miss them.
+  outputFileTracingRoot: join(dirname(fileURLToPath(import.meta.url)), "..", ".."),
   // The workspace packages ship TypeScript source rather than build output, so
   // Next compiles them in-place. One fewer build step, and stack traces point at
   // real files.

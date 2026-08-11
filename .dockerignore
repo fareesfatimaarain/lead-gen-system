@@ -1,0 +1,35 @@
+# Dependencies are installed inside the image against the lockfile. Copying a
+# host node_modules in would ship the host's platform binaries and silently
+# override the resolved tree.
+node_modules
+**/node_modules
+
+# Build output
+.next
+**/.next
+dist
+**/dist
+**/*.tsbuildinfo
+out
+coverage
+
+# Secrets. .env must never enter an image layer — layers are extractable from
+# any registry the image is pushed to, deleted file or not.
+.env
+.env.*
+!.env.example
+
+.git
+.github
+.claude
+*.log
+
+# The frozen original agent. Its package.json is copied explicitly by the
+# Dockerfile because npm needs it to resolve the workspace tree; its source is
+# not part of either runtime image.
+legacy/**
+!legacy/package.json
+
+docs
+README.md
+*.md

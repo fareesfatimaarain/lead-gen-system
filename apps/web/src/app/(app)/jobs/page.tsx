@@ -32,14 +32,12 @@ export default async function JobsPage({
         ) : (
           <Table>
             <THead>
-              <TR>
-                <TH>Job Name</TH>
-                <TH>Status</TH>
-                <TH align="right">Attempts</TH>
-                <TH>Error Details</TH>
-                <TH>Started</TH>
-                <TH>Completed</TH>
-              </TR>
+              <TH>Job Name</TH>
+              <TH>Status</TH>
+              <TH align="right">Attempts</TH>
+              <TH>Error Details</TH>
+              <TH>Started</TH>
+              <TH>Completed</TH>
             </THead>
             <tbody>
               {jobsData.rows.map((j) => {

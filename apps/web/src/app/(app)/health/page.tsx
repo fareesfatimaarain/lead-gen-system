@@ -73,16 +73,14 @@ export default async function SendingHealthPage() {
           ) : (
             <Table>
               <THead>
-                <TR>
-                  <TH>Mailbox</TH>
-                  <TH>Status</TH>
-                  <TH align="right">Cap / Day</TH>
-                  <TH align="right">Sent Today</TH>
-                  <TH>SPF</TH>
-                  <TH>DKIM</TH>
-                  <TH>DMARC</TH>
-                  <TH>Paused Reason</TH>
-                </TR>
+                <TH>Mailbox</TH>
+                <TH>Status</TH>
+                <TH align="right">Cap / Day</TH>
+                <TH align="right">Sent Today</TH>
+                <TH>SPF</TH>
+                <TH>DKIM</TH>
+                <TH>DMARC</TH>
+                <TH>Paused Reason</TH>
               </THead>
               <tbody>
                 {health.mailboxes.map((m) => (
@@ -116,12 +114,10 @@ export default async function SendingHealthPage() {
           ) : (
             <Table>
               <THead>
-                <TR>
-                  <TH>Rule Triggered</TH>
-                  <TH>Channel</TH>
-                  <TH>Reason</TH>
-                  <TH>Timestamp</TH>
-                </TR>
+                <TH>Rule Triggered</TH>
+                <TH>Channel</TH>
+                <TH>Reason</TH>
+                <TH>Timestamp</TH>
               </THead>
               <tbody>
                 {guardrails.rows.map((ev) => (

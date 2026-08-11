@@ -54,12 +54,10 @@ export default async function SequencesPage() {
         ) : (
           <Table>
             <THead>
-              <TR>
-                <TH>Sequence</TH>
-                <TH align="right">Steps</TH>
-                <TH align="right">Campaigns</TH>
-                <TH>Last Updated</TH>
-              </TR>
+              <TH>Sequence</TH>
+              <TH align="right">Steps</TH>
+              <TH align="right">Campaigns</TH>
+              <TH>Last Updated</TH>
             </THead>
             <tbody>
               {sequences.map((s) => (

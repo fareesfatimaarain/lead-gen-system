@@ -279,6 +279,12 @@ export function Table({ children, className }: { children: ReactNode; className?
   );
 }
 
+/**
+ * Renders the header row itself, so children are `<TH>` cells directly — do not
+ * wrap them in a `<TR>`. A nested `<tr>` is invalid HTML the parser hoists out
+ * of the table, which drops the header cells out of the column grid and leaves
+ * them visibly misaligned with the body.
+ */
 export function THead({ children }: { children: ReactNode }) {
   return (
     <thead className="sticky top-0 z-10 bg-bg">

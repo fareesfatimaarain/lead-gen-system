@@ -55,16 +55,14 @@ export default async function CampaignsPage() {
         ) : (
           <Table>
             <THead>
-              <TR>
-                <TH>Campaign</TH>
-                <TH>Status</TH>
-                <TH>ICP Target</TH>
-                <TH>Sequence</TH>
-                <TH align="right">Prospects</TH>
-                <TH align="right">Sent</TH>
-                <TH align="right">Replies</TH>
-                <TH>Created</TH>
-              </TR>
+              <TH>Campaign</TH>
+              <TH>Status</TH>
+              <TH>ICP Target</TH>
+              <TH>Sequence</TH>
+              <TH align="right">Prospects</TH>
+              <TH align="right">Sent</TH>
+              <TH align="right">Replies</TH>
+              <TH>Created</TH>
             </THead>
             <tbody>
               {campaigns.map((ca) => {

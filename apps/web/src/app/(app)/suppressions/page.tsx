@@ -36,13 +36,11 @@ export default async function SuppressionsPage({
             ) : (
               <Table>
                 <THead>
-                  <TR>
-                    <TH>Type</TH>
-                    <TH>Target Value</TH>
-                    <TH>Reason</TH>
-                    <TH>Source</TH>
-                    <TH>Date Added</TH>
-                  </TR>
+                  <TH>Type</TH>
+                  <TH>Target Value</TH>
+                  <TH>Reason</TH>
+                  <TH>Source</TH>
+                  <TH>Date Added</TH>
                 </THead>
                 <tbody>
                   {suppressionsData.rows.map((s) => (

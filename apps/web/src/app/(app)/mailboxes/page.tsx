@@ -28,13 +28,11 @@ export default async function MailboxesPage() {
             ) : (
               <Table>
                 <THead>
-                  <TR>
-                    <TH>Mailbox Email</TH>
-                    <TH>Status</TH>
-                    <TH align="right">Cap / Day</TH>
-                    <TH align="right">Sent Today</TH>
-                    <TH>Domain Auth (SPF / DKIM / DMARC)</TH>
-                  </TR>
+                  <TH>Mailbox Email</TH>
+                  <TH>Status</TH>
+                  <TH align="right">Cap / Day</TH>
+                  <TH align="right">Sent Today</TH>
+                  <TH>Domain Auth (SPF / DKIM / DMARC)</TH>
                 </THead>
                 <tbody>
                   {mailboxes.map((m) => {

@@ -33,14 +33,12 @@ export default async function CallsPage({
         ) : (
           <Table>
             <THead>
-              <TR>
-                <TH>Prospect / Company</TH>
-                <TH>Disposition</TH>
-                <TH align="right">Duration</TH>
-                <TH>Summary</TH>
-                <TH align="right">Cost</TH>
-                <TH>Date</TH>
-              </TR>
+              <TH>Prospect / Company</TH>
+              <TH>Disposition</TH>
+              <TH align="right">Duration</TH>
+              <TH>Summary</TH>
+              <TH align="right">Cost</TH>
+              <TH>Date</TH>
             </THead>
             <tbody>
               {callsData.rows.map((c) => (

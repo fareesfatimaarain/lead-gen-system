@@ -32,16 +32,14 @@ export default async function AgentRunsPage({
         ) : (
           <Table>
             <THead>
-              <TR>
-                <TH>Agent Type</TH>
-                <TH>Model</TH>
-                <TH align="right">Input Tokens</TH>
-                <TH align="right">Output Tokens</TH>
-                <TH align="right">Cost USD</TH>
-                <TH align="right">Latency</TH>
-                <TH>Target Prospect</TH>
-                <TH>Timestamp</TH>
-              </TR>
+              <TH>Agent Type</TH>
+              <TH>Model</TH>
+              <TH align="right">Input Tokens</TH>
+              <TH align="right">Output Tokens</TH>
+              <TH align="right">Cost USD</TH>
+              <TH align="right">Latency</TH>
+              <TH>Target Prospect</TH>
+              <TH>Timestamp</TH>
             </THead>
             <tbody>
               {agentRunsData.rows.map((r) => (

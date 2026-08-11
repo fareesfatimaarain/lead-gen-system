@@ -32,13 +32,11 @@ export default async function ActivityPage({
         ) : (
           <Table>
             <THead>
-              <TR>
-                <TH>Activity Type</TH>
-                <TH>Prospect</TH>
-                <TH>Details</TH>
-                <TH>Channel</TH>
-                <TH>Timestamp</TH>
-              </TR>
+              <TH>Activity Type</TH>
+              <TH>Prospect</TH>
+              <TH>Details</TH>
+              <TH>Channel</TH>
+              <TH>Timestamp</TH>
             </THead>
             <tbody>
               {activityData.rows.map((act) => (

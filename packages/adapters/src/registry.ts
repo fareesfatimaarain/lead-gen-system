@@ -547,8 +547,7 @@ export function providersByCategory(
  * The registry as the client sees it: no adapters, no functions, no secrets.
  * This is what the Connections page is rendered from.
  */
-export interface PublicProviderDefinition
-  extends Omit<ProviderDefinition, "adapter" | "configSchema"> {}
+export type PublicProviderDefinition = Omit<ProviderDefinition, "adapter" | "configSchema">;
 
 export function publicRegistry(): PublicProviderDefinition[] {
   return PROVIDERS.map(({ adapter: _adapter, configSchema: _schema, ...rest }) => rest);

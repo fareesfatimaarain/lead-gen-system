@@ -1,6 +1,5 @@
 import Link from "next/link";
 import {
-  Badge,
   Card,
   EmptyState,
   PageHeader,

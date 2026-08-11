@@ -1,31 +1,59 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useSyncExternalStore } from "react";
 import { Button, cx } from "@/components/ui";
 
 type Theme = "system" | "light" | "dark";
 
 /**
+ * localStorage has no change event for the tab that wrote it, so writes
+ * announce themselves. "storage" covers the other direction: a second tab.
+ */
+const THEME_EVENT = "themechange";
+
+function subscribe(onStoreChange: () => void) {
+  window.addEventListener(THEME_EVENT, onStoreChange);
+  window.addEventListener("storage", onStoreChange);
+  return () => {
+    window.removeEventListener(THEME_EVENT, onStoreChange);
+    window.removeEventListener("storage", onStoreChange);
+  };
+}
+
+function readTheme(): Theme {
+  const stored = localStorage.getItem("theme");
+  return stored === "light" || stored === "dark" ? stored : "system";
+}
+
+/**
+ * The server cannot know the preference. Rendering "system" and correcting on
+ * hydration is safe here because layout.tsx sets data-theme before first paint,
+ * so the page is never briefly the wrong colour — only this control is.
+ */
+function serverTheme(): Theme {
+  return "system";
+}
+
+/**
  * Theme switch. Both themes are designed, not one derived from the other, so
  * "system" is a real third option rather than a fallback.
+ *
+ * localStorage is the source of truth rather than component state: the pre-paint
+ * script in layout.tsx already reads it, and a second copy in React state is one
+ * that can disagree with the DOM.
  */
 export function ThemeToggle() {
-  const [theme, setTheme] = useState<Theme>("system");
+  const theme = useSyncExternalStore(subscribe, readTheme, serverTheme);
 
   useEffect(() => {
-    const stored = localStorage.getItem("theme");
-    if (stored === "light" || stored === "dark") setTheme(stored);
-  }, []);
+    if (theme === "system") delete document.documentElement.dataset.theme;
+    else document.documentElement.dataset.theme = theme;
+  }, [theme]);
 
   function apply(next: Theme) {
-    setTheme(next);
-    if (next === "system") {
-      localStorage.removeItem("theme");
-      delete document.documentElement.dataset.theme;
-    } else {
-      localStorage.setItem("theme", next);
-      document.documentElement.dataset.theme = next;
-    }
+    if (next === "system") localStorage.removeItem("theme");
+    else localStorage.setItem("theme", next);
+    window.dispatchEvent(new Event(THEME_EVENT));
   }
 
   return (

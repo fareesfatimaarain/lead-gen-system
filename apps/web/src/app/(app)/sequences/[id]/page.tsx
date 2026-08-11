@@ -1,6 +1,4 @@
-import Link from "next/link";
-import { notFound } from "next/navigation";
-import { Badge, Card, PageHeader } from "@/components/ui";
+import { Card, PageHeader } from "@/components/ui";
 import { getSequence } from "@/lib/data";
 import { requirePageSession } from "@/lib/session";
 import { StepAddForm } from "./StepAddForm";
@@ -27,7 +25,7 @@ export default async function SequenceDetailPage({ params }: { params: Promise<{
             </Card>
           ) : (
             <div className="flex flex-col gap-3">
-              {steps.map((st, idx) => (
+              {steps.map((st) => (
                 <div key={st.id} className="relative flex items-start gap-4 rounded border border-border bg-surface p-4">
                   <div className="grid size-7 shrink-0 place-items-center rounded bg-accent-muted font-mono text-xs font-bold text-accent">
                     {st.position}

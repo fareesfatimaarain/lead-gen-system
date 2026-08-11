@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState, useTransition } from "react";
-import { Badge, Button, Card, StatusDot } from "@/components/ui";
+import { Badge, Button, Card } from "@/components/ui";
 import { formatDateTime } from "@/lib/format";
 import { markReplyHandledAction } from "./actions";
 

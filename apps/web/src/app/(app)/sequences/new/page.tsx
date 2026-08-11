@@ -1,4 +1,4 @@
-import { Button, Card, Field, Input, PageHeader } from "@/components/ui";
+import { Card, PageHeader } from "@/components/ui";
 import { SequenceForm } from "./SequenceForm";
 
 export default function NewSequencePage() {

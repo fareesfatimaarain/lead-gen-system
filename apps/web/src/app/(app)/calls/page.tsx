@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { Badge, Card, EmptyState, PageHeader, Table, TD, TH, THead, TR, RowLink } from "@/components/ui";
 import { listCalls } from "@/lib/data";
 import { formatDateTime, formatDuration, formatUsd } from "@/lib/format";

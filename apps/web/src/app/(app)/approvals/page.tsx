@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Badge, Card, EmptyState, PageHeader } from "@/components/ui";
+import { Card, EmptyState, PageHeader } from "@/components/ui";
 import { getApprovalGate, listApprovals } from "@/lib/data";
 import { requirePageSession } from "@/lib/session";
 import { ApprovalCard } from "./ApprovalCard";

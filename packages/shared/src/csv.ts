@@ -9,7 +9,10 @@
 
 export function parseCsv(text: string): string[][] {
   const rows: string[][] = [];
-  const s = String(text).replace(/^﻿/, "");
+  // \uFEFF rather than the literal byte-order mark: Excel writes one at the
+  // start of every CSV it exports, and an invisible character in the source is
+  // one an editor or a copy-paste can silently drop.
+  const s = String(text).replace(/^\uFEFF/, "");
   let field = "";
   let row: string[] = [];
   let inQuotes = false;

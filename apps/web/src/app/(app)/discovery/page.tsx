@@ -3,7 +3,6 @@ import {
   Badge,
   Card,
   EmptyState,
-  Notice,
   Pager,
   PageHeader,
   RowLink,

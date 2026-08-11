@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { Card, PageHeader } from "@/components/ui";
 import { getApprovalGate, listIcps, listMailboxes, listSequences } from "@/lib/data";
 import { requirePageSession } from "@/lib/session";

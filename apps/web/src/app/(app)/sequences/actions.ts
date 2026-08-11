@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { eq, schema, withOrg } from "@outreach/db";
-import { notFound, validationFailed } from "@outreach/shared";
+import { validationFailed } from "@outreach/shared";
 import { action, str } from "@/lib/action";
 import type { ActionState } from "@/lib/action";
 

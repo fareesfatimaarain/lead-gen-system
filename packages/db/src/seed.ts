@@ -185,7 +185,7 @@ async function main(): Promise<void> {
       .values({ orgId: org.id, campaignId: campaign.id, mailboxId: mailbox.id })
       .onConflictDoNothing();
 
-    const companyRows = await Promise.all([
+    await Promise.all([
       tx
         .insert(schema.companies)
         .values({
@@ -472,7 +472,10 @@ async function main(): Promise<void> {
       },
     ]).onConflictDoNothing();
 
-    await tx.insert(schema.emails).values([
+    // Annotated rather than inferred: without a contextual type the array of
+    // differently-shaped literals widens every enum column to `string`, and a
+    // key that matches no column passes unnoticed.
+    const emailRows: (typeof schema.emails.$inferInsert)[] = [
       {
         orgId: org.id,
         prospectId: prospectMap.get("mara@northpeakstudio.com")!,
@@ -486,8 +489,7 @@ async function main(): Promise<void> {
         reasoning: "Used the expansion and hiring signals to justify the message; kept it low-commitment and specific.",
         model: "claude-3.5-sonnet",
         scheduledFor: new Date(Date.now() + 3600000),
-        generated: undefined,
-      } as any,
+      },
       {
         orgId: org.id,
         prospectId: prospectMap.get("oliver@harborandco.com")!,
@@ -501,10 +503,11 @@ async function main(): Promise<void> {
         reasoning: "Grounded in review themes and customer journey issues on the account.",
         model: "claude-3.5-sonnet",
         sentAt: new Date(Date.now() - 86400000),
-      } as any,
-    ] as any[]).onConflictDoNothing();
+      },
+    ];
+    await tx.insert(schema.emails).values(emailRows).onConflictDoNothing();
 
-    await tx.insert(schema.emailReplies).values([
+    const replyRows: (typeof schema.emailReplies.$inferInsert)[] = [
       {
         orgId: org.id,
         prospectId: prospectMap.get("oliver@harborandco.com")!,
@@ -518,9 +521,10 @@ async function main(): Promise<void> {
         handledAt: null,
         receivedAt: new Date(Date.now() - 2 * 3600000),
       },
-    ] as any).onConflictDoNothing();
+    ];
+    await tx.insert(schema.emailReplies).values(replyRows).onConflictDoNothing();
 
-    await tx.insert(schema.calls).values([
+    const callRows: (typeof schema.calls.$inferInsert)[] = [
       {
         orgId: org.id,
         prospectId: prospectMap.get("mara@northpeakstudio.com")!,
@@ -539,7 +543,8 @@ async function main(): Promise<void> {
         startedAt: new Date(Date.now() - 6 * 3600000),
         endedAt: new Date(Date.now() - 5 * 3600000),
       },
-    ] as any).onConflictDoNothing();
+    ];
+    await tx.insert(schema.calls).values(callRows).onConflictDoNothing();
 
     await tx.insert(schema.activities).values([
       {

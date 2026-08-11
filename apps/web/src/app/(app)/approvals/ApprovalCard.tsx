@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState, useTransition } from "react";
+import type { ValidatorReport } from "@outreach/db";
 import { Badge, Button, Card, Textarea } from "@/components/ui";
 import { formatDateTime } from "@/lib/format";
 import { approveDraftAction, rejectDraftAction, updateDraftTextAction } from "./actions";
@@ -12,7 +13,7 @@ interface Draft {
   bodyText: string;
   reasoning: string | null;
   citedSignalIds: string[] | null;
-  validatorReport: any;
+  validatorReport: ValidatorReport | null;
   regenerationCount: number;
   model: string | null;
   generationCostUsd: string | null;

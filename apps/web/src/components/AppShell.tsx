@@ -99,6 +99,19 @@ export function AppShell({
   const pathname = usePathname();
   const [paletteOpen, setPaletteOpen] = useState(false);
 
+  // Cmd/Ctrl+K lives here rather than in the palette because the palette only
+  // exists while it is open, and the shortcut has to work when it is not.
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        setPaletteOpen(true);
+      }
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
+
   // `?` opens the shortcut sheet from anywhere. Keyboard-first only works if the
   // keys are discoverable without reading documentation.
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
@@ -124,7 +137,7 @@ export function AppShell({
         onOpenPalette={() => setPaletteOpen(true)}
       />
       <main className="min-w-0 border-l border-border bg-bg">{children}</main>
-      <CommandPalette open={paletteOpen} onOpenChange={setPaletteOpen} />
+      {paletteOpen && <CommandPalette onClose={() => setPaletteOpen(false)} />}
       <ShortcutSheet open={shortcutsOpen} onClose={() => setShortcutsOpen(false)} />
     </div>
   );
@@ -277,7 +290,7 @@ function ShortcutSheet({ open, onClose }: { open: boolean; onClose: () => void }
  * table with the right filters — a palette that returns a worse version of that
  * would be a second, wrong way to find a prospect.
  */
-function CommandPalette({ open, onOpenChange }: { open: boolean; onOpenChange: (v: boolean) => void }) {
+function CommandPalette({ onClose }: { onClose: () => void }) {
   const router = useRouter();
   const [query, setQuery] = useState("");
   const [cursor, setCursor] = useState(0);
@@ -288,34 +301,21 @@ function CommandPalette({ open, onOpenChange }: { open: boolean; onOpenChange: (
 
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
-      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
-        e.preventDefault();
-        onOpenChange(true);
-      }
-      if (e.key === "Escape") onOpenChange(false);
+      if (e.key === "Escape") onClose();
     }
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [onOpenChange]);
-
-  useEffect(() => {
-    if (open) {
-      setQuery("");
-      setCursor(0);
-    }
-  }, [open]);
-
-  if (!open) return null;
+  }, [onClose]);
 
   const go = (href: string) => {
-    onOpenChange(false);
+    onClose();
     router.push(href);
   };
 
   return (
     <div
       className="fixed inset-0 z-50 flex items-start justify-center bg-black/25 pt-[12vh]"
-      onClick={() => onOpenChange(false)}
+      onClick={onClose}
       role="dialog"
       aria-modal="true"
       aria-label="Command palette"

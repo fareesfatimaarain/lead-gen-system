@@ -1,6 +1,5 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
-import { Badge, Card, PageHeader, Stat, StatRow, StatusDot } from "@/components/ui";
+import { Card, PageHeader, Stat, StatRow, StatusDot } from "@/components/ui";
 import { getCampaign } from "@/lib/data";
 import { requirePageSession } from "@/lib/session";
 import { CampaignControls } from "./CampaignControls";

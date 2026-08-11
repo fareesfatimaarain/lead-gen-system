@@ -4,7 +4,7 @@ import { can, rankSourcesForIcp } from "@outreach/shared";
 import { Badge, Card, EmptyState, Notice, PageHeader, SectionHeading, Table, TD, TH, THead, TR } from "@/components/ui";
 import { listCredentials } from "@/lib/credentials";
 import { getSourcePerformanceSummary, listDataSources, listIcps } from "@/lib/data";
-import { formatUsd, humanize } from "@/lib/format";
+import { humanize } from "@/lib/format";
 import { requirePageSession } from "@/lib/session";
 import { CsvImportForm } from "./CsvImportForm";
 import { SourceForm } from "./SourceForm";

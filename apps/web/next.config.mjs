@@ -40,7 +40,6 @@ const nextConfig = {
   // Never bundle the driver or the provider SDKs — they use dynamic requires and
   // native sockets that a bundler mangles.
   serverExternalPackages: ["postgres", "nodemailer", "@anthropic-ai/sdk"],
-  eslint: { ignoreDuringBuilds: true },
 };
 
 export default nextConfig;

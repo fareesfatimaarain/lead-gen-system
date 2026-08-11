@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2022"],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+    "noFallthroughCasesInSwitch": true,
+    "exactOptionalPropertyTypes": false,
+
+    "skipLibCheck": true,
+    "sourceMap": true,
+
+    // Deliberately not a composite project graph. The workspace packages ship
+    // TypeScript source and are compiled in place by whatever consumes them —
+    // Next (transpilePackages), vitest, and tsx. Project references would demand
+    // built .d.ts output that nothing needs and that would go stale.
+
+    "paths": {
+      "@outreach/shared": ["./packages/shared/src/index.ts"],
+      "@outreach/shared/*": ["./packages/shared/src/*"],
+      "@outreach/db": ["./packages/db/src/index.ts"],
+      "@outreach/db/*": ["./packages/db/src/*"],
+      "@outreach/adapters": ["./packages/adapters/src/index.ts"],
+      "@outreach/adapters/*": ["./packages/adapters/src/*"],
+      "@outreach/jobs": ["./packages/jobs/src/index.ts"],
+      "@outreach/jobs/*": ["./packages/jobs/src/*"],
+      "@outreach/ingest": ["./packages/ingest/src/index.ts"],
+      "@outreach/ingest/*": ["./packages/ingest/src/*"]
+    }
+  },
+  "exclude": ["node_modules", "dist", ".next"]
+}

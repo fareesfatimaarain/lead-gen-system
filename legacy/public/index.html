@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Calling Agent · Control Center</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <div class="app">
+      <aside class="sidebar">
+        <div class="brand">
+          <div class="mark">CA</div>
+          <div class="brand-text">
+            <strong>Calling Agent</strong>
+            <span>Outreach Autopilot</span>
+          </div>
+        </div>
+
+        <nav id="nav">
+          <a href="#/" class="nav-link" data-route="/"><span class="nav-ico">▤</span> Overview</a>
+          <a href="#/tools" class="nav-link" data-route="/tools"><span class="nav-ico">🎙</span> Live Test</a>
+          <a href="#/dnc" class="nav-link" data-route="/dnc"><span class="nav-ico">⛔</span> Do Not Call</a>
+        </nav>
+
+        <button id="newCampaignBtn" class="btn btn-primary full-width" type="button">
+          <span class="btn-ico">＋</span> New Campaign
+        </button>
+
+        <div class="sidebar-footer">
+          <div class="live-dot"><span></span> <span id="dialerState">Dialer idle</span></div>
+        </div>
+      </aside>
+
+      <main>
+        <div id="view" class="view"><div class="loading">Loading…</div></div>
+      </main>
+    </div>
+
+    <!-- New campaign modal -->
+    <div id="modalRoot" class="modal-root" hidden>
+      <div class="modal-backdrop" data-close></div>
+      <div class="modal" role="dialog" aria-modal="true" aria-label="New campaign">
+        <div class="modal-head">
+          <h2>New Campaign</h2>
+          <button class="icon-btn" type="button" data-close aria-label="Close">✕</button>
+        </div>
+        <form id="newCampaignForm" class="modal-body">
+          <label class="field">
+            <span>Campaign name</span>
+            <input name="name" placeholder="Q3 Outreach — Karachi" required />
+          </label>
+          <div class="field-grid">
+            <label class="field">
+              <span>Timezone</span>
+              <input name="timezone" value="Asia/Karachi" />
+            </label>
+            <label class="field">
+              <span>Max attempts</span>
+              <input name="maxAttempts" type="number" min="1" max="10" value="2" />
+            </label>
+            <label class="field">
+              <span>Call from (hour)</span>
+              <input name="callWindowStart" type="number" min="0" max="23" value="9" />
+            </label>
+            <label class="field">
+              <span>Call until (hour)</span>
+              <input name="callWindowEnd" type="number" min="0" max="23" value="21" />
+            </label>
+            <label class="field">
+              <span>Retry after (min)</span>
+              <input name="retryMinutes" type="number" min="5" value="30" />
+            </label>
+          </div>
+          <div class="modal-actions">
+            <button type="button" class="btn btn-ghost" data-close>Cancel</button>
+            <button type="submit" class="btn btn-primary">Create Campaign</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div id="toast" class="toast" hidden></div>
+
+    <script type="module" src="/app.js"></script>
+  </body>
+</html>

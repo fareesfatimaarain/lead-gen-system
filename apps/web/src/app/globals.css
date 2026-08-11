@@ -1,0 +1,198 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ==========================================================================
+   Design tokens.
+
+   Light is defined on bare :root so a viewer with no explicit choice still
+   gets a complete palette. Dark is redefined twice — once under
+   prefers-color-scheme for the system default, once under [data-theme="dark"]
+   so an explicit toggle wins in both directions.
+   ========================================================================== */
+
+:root {
+  color-scheme: light;
+
+  --bg: 252 252 253;
+  --surface: 255 255 255;
+  --surface-raised: 255 255 255;
+  --surface-hover: 246 247 248;
+
+  --border: 229 231 234;
+  --border-strong: 208 212 217;
+
+  --fg: 24 26 29;
+  --fg-muted: 95 101 110;
+  --fg-subtle: 139 146 155;
+
+  --accent: 47 92 224;
+  --accent-fg: 255 255 255;
+  --accent-muted: 235 240 253;
+
+  --ok: 22 128 84;
+  --ok-muted: 232 246 238;
+  --warn: 165 106 10;
+  --warn-muted: 252 245 230;
+  --danger: 194 47 47;
+  --danger-muted: 253 236 236;
+
+  --font-sans: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", "Cascadia Mono", "Segoe UI Mono", Menlo, Consolas,
+    monospace;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+
+    --bg: 12 13 15;
+    --surface: 20 21 24;
+    --surface-raised: 26 28 32;
+    --surface-hover: 31 33 38;
+
+    --border: 39 42 48;
+    --border-strong: 56 60 68;
+
+    --fg: 237 239 242;
+    --fg-muted: 156 163 173;
+    --fg-subtle: 113 120 130;
+
+    --accent: 106 145 255;
+    --accent-fg: 12 13 15;
+    --accent-muted: 26 33 54;
+
+    --ok: 61 190 130;
+    --ok-muted: 17 38 30;
+    --warn: 217 155 62;
+    --warn-muted: 41 32 16;
+    --danger: 240 106 106;
+    --danger-muted: 45 22 22;
+  }
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  --bg: 12 13 15;
+  --surface: 20 21 24;
+  --surface-raised: 26 28 32;
+  --surface-hover: 31 33 38;
+
+  --border: 39 42 48;
+  --border-strong: 56 60 68;
+
+  --fg: 237 239 242;
+  --fg-muted: 156 163 173;
+  --fg-subtle: 113 120 130;
+
+  --accent: 106 145 255;
+  --accent-fg: 12 13 15;
+  --accent-muted: 26 33 54;
+
+  --ok: 61 190 130;
+  --ok-muted: 17 38 30;
+  --warn: 217 155 62;
+  --warn-muted: 41 32 16;
+  --danger: 240 106 106;
+  --danger-muted: 45 22 22;
+}
+
+@layer base {
+  * {
+    border-color: rgb(var(--border));
+  }
+
+  html {
+    /* No smooth scroll — it is motion, and it delays the thing the user asked for. */
+    scroll-behavior: auto;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background-color: rgb(var(--bg));
+    color: rgb(var(--fg));
+    font-family: var(--font-sans);
+    font-size: 13px;
+    line-height: 20px;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+
+  /* Numbers align in columns everywhere, without a utility class per cell. */
+  table,
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+
+  code,
+  kbd,
+  samp,
+  pre,
+  .mono {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+  }
+
+  :focus-visible {
+    outline: 2px solid rgb(var(--accent));
+    outline-offset: 1px;
+    border-radius: 3px;
+  }
+
+  ::placeholder {
+    color: rgb(var(--fg-subtle));
+  }
+
+  ::selection {
+    background: rgb(var(--accent) / 0.22);
+  }
+
+  /* Thin, unobtrusive scrollbars — the content is the interface. */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: rgb(var(--border-strong)) transparent;
+  }
+  *::-webkit-scrollbar {
+    width: 9px;
+    height: 9px;
+  }
+  *::-webkit-scrollbar-thumb {
+    background: rgb(var(--border-strong));
+    border-radius: 9999px;
+    border: 2px solid transparent;
+    background-clip: content-box;
+  }
+  *::-webkit-scrollbar-track {
+    background: transparent;
+  }
+}
+
+/* ==========================================================================
+   Motion budget.
+
+   The only permitted motion is hover/press feedback, overlay enter/exit, and
+   the indeterminate progress bar — all at or under 150ms. Anything not opted
+   into via .motion-ok is instant, which is why route changes have no fade and
+   lists have no stagger.
+   ========================================================================== */
+
+@layer utilities {
+  .motion-ok {
+    transition-property: background-color, border-color, color, opacity, transform;
+    transition-duration: 120ms;
+    transition-timing-function: cubic-bezier(0.2, 0, 0.2, 1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

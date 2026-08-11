@@ -1,0 +1,29 @@
+node_modules/
+.next/
+dist/
+build/
+out/
+*.tsbuildinfo
+
+# Secrets — never commit
+.env
+.env.*
+!.env.example
+
+# Local data
+*.db
+*.db-shm
+*.db-wal
+/legacy/src/data/
+
+# Logs
+*.log
+logs/
+
+# Test / coverage
+coverage/
+.vitest/
+
+# OS
+.DS_Store
+Thumbs.db

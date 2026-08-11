@@ -1,0 +1,21 @@
+{
+  "name": "calling-agent-legacy",
+  "version": "1.0.0",
+  "description": "FROZEN. The original Vapi calling MVP. Kept runnable until Phase 5 places a real call through the new stack — see docs/EXISTING_AUDIT.md.",
+  "main": "src/server.js",
+  "private": true,
+  "scripts": {
+    "start": "node src/server.js",
+    "setup": "node scripts/setup-assistant.js",
+    "test-webhook": "node scripts/test-webhook.js"
+  },
+  "dependencies": {
+    "better-sqlite3": "^12.11.1",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "openai": "^4.77.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

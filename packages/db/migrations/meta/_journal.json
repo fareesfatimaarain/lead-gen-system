@@ -1,0 +1,27 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1786126251653,
+      "tag": "0000_yummy_sersi",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1786135437192,
+      "tag": "0001_whole_the_enforcers",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1786151741419,
+      "tag": "0002_real_wolfsbane",
+      "breakpoints": true
+    }
+  ]
+}

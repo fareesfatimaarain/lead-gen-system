@@ -55,6 +55,24 @@ export default async function ProspectsPage({
       <PageHeader
         title="Prospects"
         description="Every person discovered for this workspace, and where each one stands."
+        actions={
+          // Carries the status and campaign filters through, so the button
+          // exports what is on screen rather than silently everything. A plain
+          // link, not a fetch: the browser streams the file straight to disk.
+          <a
+            href={`/api/export/prospects${
+              filters.status || filters.campaignId
+                ? `?${new URLSearchParams({
+                    ...(filters.status ? { status: filters.status } : {}),
+                    ...(filters.campaignId ? { campaignId: filters.campaignId } : {}),
+                  }).toString()}`
+                : ""
+            }`}
+            className="rounded border border-border px-3 py-1.5 text-sm text-fg-muted hover:bg-surface hover:text-fg"
+          >
+            Export CSV
+          </a>
+        }
       />
 
       <Toolbar>

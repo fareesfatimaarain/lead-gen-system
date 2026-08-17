@@ -72,3 +72,13 @@ describe("maskPhone", () => {
     expect(maskPhone("not a phone")).toBe("not a phone");
   });
 });
+
+describe("normalizePhone and the CSV export guard", () => {
+  // `toCsv` prefixes a tab to any value starting with + so Excel does not treat
+  // it as a formula — which applies to every E.164 number we export. Export ->
+  // re-import is an obvious workflow, so the guard must wash out here.
+  it("ignores the leading tab a CSV export adds to a + number", () => {
+    expect(normalizePhone("\t+14155550677", "+1")).toBe("+14155550677");
+    expect(normalizePhone("\t+971500000000", "+971")).toBe("+971500000000");
+  });
+});

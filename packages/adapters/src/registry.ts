@@ -5,6 +5,7 @@ import { bayutProvider } from "./providers/bayut";
 import { dubaiPulseProvider } from "./providers/dubai-pulse";
 import { propertyFinderProvider } from "./providers/propertyfinder";
 import { googlePlacesProvider } from "./providers/google-places";
+import { hubspotProvider } from "./providers/hubspot";
 import { hunterDomainSearchProvider, hunterVerifierProvider } from "./providers/hunter";
 import { overpassProvider } from "./providers/overpass";
 import { rentcastProvider } from "./providers/rentcast";
@@ -511,6 +512,36 @@ export const PROVIDERS: ProviderDefinition[] = [
     ],
     configSchema: z.object({ mode: z.enum(["rapidapi", "enterprise"]), rapidApiHost: z.string().optional() }),
     adapter: propertyFinderProvider,
+    verified: false,
+  },
+
+  {
+    id: "hubspot",
+    name: "HubSpot",
+    category: "crm",
+    summary: "Pushes qualified prospects into HubSpot, and imports existing contacts so customers are never cold-emailed.",
+    docsUrl: "https://developers.hubspot.com/docs/api/crm/contacts",
+    secretField: {
+      label: "Private App access token",
+      placeholder: "pat-na1-…",
+      help: "HubSpot → Settings → Integrations → Private Apps → your app → Auth. Needs the crm.objects.contacts.read and .write scopes.",
+    },
+    configFields: [
+      {
+        name: "suppressLifecycleStages",
+        label: "Treat these stages as do-not-contact",
+        type: "text",
+        required: false,
+        default: "customer",
+        placeholder: "customer,opportunity",
+        help: "Comma-separated HubSpot lifecycle stages. Contacts imported at one of these stages are added to suppressions, so outreach never lands on an existing customer or an open deal.",
+      },
+    ],
+    configSchema: z.object({ suppressLifecycleStages: z.string().optional() }),
+    adapter: hubspotProvider,
+    // Written from HubSpot's public CRM v3 reference; no portal was available to
+    // call. `npm run providers:verify` flips this once testConnection passes
+    // against a real token.
     verified: false,
   },
 ];

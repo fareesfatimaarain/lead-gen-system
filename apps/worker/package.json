@@ -6,7 +6,8 @@
   "scripts": {
     "start": "tsx --env-file-if-exists=../../.env src/index.ts",
     "dev": "tsx watch --env-file-if-exists=../../.env src/index.ts",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "providers:verify": "tsx --env-file-if-exists=../../.env src/verify-providers.ts"
   },
   "dependencies": {
     "@outreach/adapters": "*",

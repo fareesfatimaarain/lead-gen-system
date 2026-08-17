@@ -231,3 +231,58 @@ export interface EmailVerifier extends ProviderAdapter {
   readonly category: "verification";
   verify(email: string, ctx: AdapterCtx): Promise<EmailVerificationResult>;
 }
+
+// ---------------------------------------------------------------------------
+// CRM
+// ---------------------------------------------------------------------------
+
+export interface CrmContact {
+  /** The identity key. Every supported CRM dedupes contacts on email. */
+  email: string;
+  firstName?: string;
+  lastName?: string;
+  phone?: string;
+  title?: string;
+  companyName?: string;
+  linkedinUrl?: string;
+  /** The CRM's own record id, when the record came back from the CRM. */
+  externalId?: string;
+  /** Provider-native stage string — "customer", "opportunity". Not normalized on purpose: see `CrmProvider`. */
+  lifecycleStage?: string;
+  raw: Record<string, unknown>;
+}
+
+export interface CrmUpsertResult {
+  externalId: string;
+  /** False when an existing record was updated. Lets the caller report created-vs-updated honestly. */
+  created: boolean;
+}
+
+export interface CrmContactPage {
+  contacts: CrmContact[];
+  /** Opaque; pass back verbatim for the next page. Absent on the last page. */
+  nextCursor?: string;
+}
+
+/**
+ * CRM adapter.
+ *
+ * Two directions, because the CRM matters for two separate reasons:
+ *
+ *   - `upsertContact` pushes qualified prospects out, so reps work them where
+ *     they already live rather than in a second system;
+ *   - `listContacts` pulls existing records in, which is how "never contact our
+ *     current customers or an open deal" gets answered. That import feeds the
+ *     suppression list.
+ *
+ * `lifecycleStage` stays a provider-native string rather than a normalized
+ * enum. Which stages count as do-not-contact is a customer policy decision —
+ * one org suppresses everything past `lead`, another only closed customers —
+ * and flattening the vendor's vocabulary into our own would destroy the
+ * information that decision needs.
+ */
+export interface CrmProvider extends ProviderAdapter {
+  readonly category: "crm";
+  upsertContact(contact: CrmContact, ctx: AdapterCtx): Promise<CrmUpsertResult>;
+  listContacts(cursor: string | undefined, ctx: AdapterCtx): Promise<CrmContactPage>;
+}

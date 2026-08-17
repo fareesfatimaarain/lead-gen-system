@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { applyMapping, mapProspectColumns, parseCsv, parseCsvToObjects } from "./csv";
+import { applyMapping, mapProspectColumns, parseCsv, parseCsvToObjects, toCsv } from "./csv";
 
 describe("parseCsv", () => {
   it("parses a plain grid", () => {
@@ -110,5 +110,61 @@ describe("applyMapping", () => {
     expect(applyMapping({ Email: "jane@co.com", Company: "   " }, m)).toEqual({
       email: "jane@co.com",
     });
+  });
+});
+
+describe("toCsv", () => {
+  const cols = [
+    { header: "Email", value: (r: { email?: string; notes?: string }) => r.email },
+    { header: "Notes", value: (r: { email?: string; notes?: string }) => r.notes },
+  ];
+
+  it("writes a header row and CRLF line endings", () => {
+    expect(toCsv([{ email: "jane@co.com", notes: "hi" }], cols)).toBe(
+      "Email,Notes\r\njane@co.com,hi\r\n",
+    );
+  });
+
+  it("writes only the header when there are no rows", () => {
+    expect(toCsv([], cols)).toBe("Email,Notes\r\n");
+  });
+
+  it("quotes fields containing commas, quotes or newlines", () => {
+    const out = toCsv([{ email: "a@b.com", notes: 'x, y "z"\nnext' }], cols);
+    expect(out).toBe('Email,Notes\r\na@b.com,"x, y ""z""\nnext"\r\n');
+  });
+
+  it("writes empty cells for null and undefined", () => {
+    expect(toCsv([{ email: undefined, notes: "n" }], cols)).toBe("Email,Notes\r\n,n\r\n");
+  });
+
+  it("round-trips through parseCsvToObjects", () => {
+    const rows = [
+      { email: "jane@co.com", notes: 'has "quotes", a comma' },
+      { email: "bob@co.com", notes: "plain" },
+    ];
+    const parsed = parseCsvToObjects(toCsv(rows, cols));
+    expect(parsed.headers).toEqual(["Email", "Notes"]);
+    expect(parsed.records).toEqual([
+      { Email: "jane@co.com", Notes: 'has "quotes", a comma' },
+      { Email: "bob@co.com", Notes: "plain" },
+    ]);
+  });
+
+  // CSV injection: Excel and Sheets execute a cell that opens with = + - or @.
+  it("defuses formula-leading values so a spreadsheet will not execute them", () => {
+    const out = toCsv([{ email: "=cmd|'/c calc'!A1", notes: "@SUM(1)" }], cols);
+    expect(out).toBe('Email,Notes\r\n"\t=cmd|\'/c calc\'!A1","\t@SUM(1)"\r\n');
+    // The original text is preserved once the guard tab is stripped.
+    const back = parseCsvToObjects(out).records[0]?.Email ?? "";
+    expect(back.replace(/^\t/, "")).toBe("=cmd|'/c calc'!A1");
+  });
+
+  it("serializes dates as ISO and objects as JSON", () => {
+    const out = toCsv([{ at: new Date("2026-01-02T03:04:05Z"), meta: { a: 1 } }], [
+      { header: "At", value: (r: { at: Date; meta: object }) => r.at },
+      { header: "Meta", value: (r: { at: Date; meta: object }) => r.meta },
+    ]);
+    expect(out).toBe('At,Meta\r\n2026-01-02T03:04:05.000Z,"{""a"":1}"\r\n');
   });
 });

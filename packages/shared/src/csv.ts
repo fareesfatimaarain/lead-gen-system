@@ -166,3 +166,63 @@ export function applyMapping(
   }
   return out;
 }
+
+// ---------------------------------------------------------------------------
+// Serializing out
+// ---------------------------------------------------------------------------
+
+/**
+ * Quote a single field.
+ *
+ * Quoting is not merely cosmetic here. A leading `=`, `+`, `-` or `@` makes
+ * Excel and Sheets treat the cell as a formula, so a prospect whose notes begin
+ * `=cmd|...` becomes a live formula in whoever opens the export — the CSV
+ * injection problem. Prefixing a tab defuses it while still displaying the
+ * original text, and the tab is inside quotes so it survives a round trip.
+ */
+function encodeField(value: unknown): string {
+  if (value === null || value === undefined) return "";
+
+  let s: string;
+  if (value instanceof Date) s = value.toISOString();
+  else if (typeof value === "object") s = JSON.stringify(value);
+  else s = String(value);
+
+  if (s === "") return "";
+
+  const risky = /^[=+\-@\t\r]/.test(s);
+  const body = risky ? `\t${s}` : s;
+
+  // Always quote when quoting could matter, rather than testing for each
+  // separator: a quoted field is valid CSV regardless, and the cost is bytes.
+  if (risky || /[",\r\n]/.test(body)) {
+    return `"${body.replace(/"/g, '""')}"`;
+  }
+  return body;
+}
+
+export interface CsvColumn<T> {
+  /** Header text written to row one. */
+  header: string;
+  /** Pulls the cell value out of a row. Returning null or undefined writes an empty cell. */
+  value: (row: T) => unknown;
+}
+
+/**
+ * Serialize rows to RFC-4180 CSV with CRLF endings, which is what Excel expects
+ * and what `parseCsv` above reads back.
+ *
+ * Columns are explicit rather than inferred from object keys: an export is a
+ * published interface, and inferring it would silently change shape — and could
+ * silently start leaking a new column — the moment someone adds a database
+ * field.
+ */
+export function toCsv<T>(rows: readonly T[], columns: readonly CsvColumn<T>[]): string {
+  const lines: string[] = [columns.map((c) => encodeField(c.header)).join(",")];
+  for (const row of rows) {
+    lines.push(columns.map((c) => encodeField(c.value(row))).join(","));
+  }
+  // Trailing CRLF: the last record ends with a line break in RFC 4180, and some
+  // importers drop a final line that lacks one.
+  return `${lines.join("\r\n")}\r\n`;
+}

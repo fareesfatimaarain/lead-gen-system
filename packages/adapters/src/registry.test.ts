@@ -87,6 +87,7 @@ describe("registry integrity", () => {
       dubai_pulse: { clientId: "id_123" },
       bayut: { mode: "rapidapi" },
       propertyfinder: { mode: "rapidapi", rapidApiHost: "example.p.rapidapi.com" },
+      hubspot: { suppressLifecycleStages: "customer" },
     };
 
     for (const p of PROVIDERS) {

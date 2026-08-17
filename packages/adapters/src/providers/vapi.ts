@@ -181,6 +181,17 @@ export const vapiProvider: VoiceProvider = {
 
   /** `POST /call`. Shape verified in production by the legacy MVP. */
   async place(req: CallRequest, ctx: AdapterCtx): Promise<CallHandle> {
+    // A phone number id is optional on the credential, because in-browser test
+    // calls do not use one. Reaching a real phone does, so say which field is
+    // missing rather than forwarding an incomplete request and relaying Vapi's
+    // less specific rejection.
+    if (!req.phoneNumberId?.trim()) {
+      throw providerError(
+        "vapi",
+        "No Vapi phone number ID is configured, so calls can only be placed in the browser. Provision a number in Vapi and add its ID on the Connections page to call real numbers.",
+      );
+    }
+
     const { status, body, text } = await vapiFetch("/call", ctx, {
       method: "POST",
       body: JSON.stringify({

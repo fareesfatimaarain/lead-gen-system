@@ -158,8 +158,8 @@ export const PROVIDERS: ProviderDefinition[] = [
         name: "phoneNumberId",
         label: "Phone number ID",
         type: "text",
-        required: true,
-        help: "Provision a number in Vapi first. Without it no call can be placed.",
+        required: false,
+        help: "Only needed to call real phone numbers. In-browser test calls do not use it, so a Vapi account with no number provisioned can still be connected here.",
       },
       {
         name: "assistantId",
@@ -184,7 +184,10 @@ export const PROVIDERS: ProviderDefinition[] = [
       },
     ],
     configSchema: z.object({
-      phoneNumberId: z.string().min(1, "Provision a phone number in Vapi and paste its ID."),
+      // Optional so a Vapi account used only for in-browser test calls can be
+      // connected. Outbound PSTN calls need it, and `vapiProvider.place` refuses
+      // clearly when it is absent rather than letting Vapi reject the request.
+      phoneNumberId: z.string().optional(),
       assistantId: z.string().min(1, "An assistant ID is required."),
       webhookSecret: z.string().min(16, "Use at least 16 characters — this is what authenticates inbound call results."),
       publicKey: z.string().optional(),

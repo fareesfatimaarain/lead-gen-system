@@ -7,7 +7,8 @@
     "start": "tsx --env-file-if-exists=../../.env src/index.ts",
     "dev": "tsx watch --env-file-if-exists=../../.env src/index.ts",
     "typecheck": "tsc --noEmit",
-    "providers:verify": "tsx --env-file-if-exists=../../.env src/verify-providers.ts"
+    "providers:verify": "tsx --env-file-if-exists=../../.env src/verify-providers.ts",
+    "legacy:import-vapi": "tsx --env-file-if-exists=../../.env src/import-legacy-vapi.ts"
   },
   "dependencies": {
     "@outreach/adapters": "*",

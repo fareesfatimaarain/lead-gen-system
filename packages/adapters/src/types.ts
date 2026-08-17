@@ -139,7 +139,8 @@ export interface EmailReceiver extends ProviderAdapter {
 
 export interface CallRequest {
   assistantId: string;
-  phoneNumberId: string;
+  /** Absent for a browser (WebRTC) call; required to reach a real phone number. */
+  phoneNumberId?: string;
   customer: { number: string; name?: string };
   /**
    * Per-prospect assistant overrides. Deep-merged by the provider onto the base

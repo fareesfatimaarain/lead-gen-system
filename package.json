@@ -24,7 +24,8 @@
     "infra:up": "docker compose up -d",
     "infra:down": "docker compose down",
     "legacy:start": "npm start --workspace=calling-agent-legacy",
-    "providers:verify": "npm run providers:verify --workspace=@outreach/worker --"
+    "providers:verify": "npm run providers:verify --workspace=@outreach/worker --",
+    "legacy:import-vapi": "npm run legacy:import-vapi --workspace=@outreach/worker --"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.5",

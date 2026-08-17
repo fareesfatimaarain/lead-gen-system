@@ -21,7 +21,7 @@
 import { and, desc, eq } from "drizzle-orm";
 import { PROVIDERS, requireProvider } from "@outreach/adapters";
 import type { TestResult } from "@outreach/shared";
-import { db, open, schema, withOrg } from "@outreach/db";
+import { closeDb, db, open, schema, withOrg } from "@outreach/db";
 
 interface Outcome {
   orgName: string;
@@ -94,7 +94,8 @@ async function main(): Promise<void> {
 
   if (targets.length === 0) {
     console.log(onlyOrg ? `No org with id ${onlyOrg}.` : "No orgs in this database.");
-    process.exit(1);
+    process.exitCode = 1;
+    return;
   }
 
   const outcomes: Outcome[] = [];
@@ -212,10 +213,15 @@ async function main(): Promise<void> {
   // Non-zero only for a credential that exists and did not work. Missing keys
   // are not a failure — they are the normal state of an unconfigured provider,
   // and failing CI over one would make the command useless in CI.
-  process.exit(failed > 0 ? 1 : 0);
+  process.exitCode = failed > 0 ? 1 : 0;
 }
 
-main().catch((err) => {
-  console.error(err);
-  process.exit(1);
-});
+// `process.exit` while the postgres pool still holds open handles aborts the
+// process with a libuv assertion on Windows — which reports a crash even when
+// every check passed. Set the code, close the pool, let node exit on its own.
+main()
+  .catch((err) => {
+    console.error(err);
+    process.exitCode = 1;
+  })
+  .finally(() => closeDb());

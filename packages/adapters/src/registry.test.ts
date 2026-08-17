@@ -101,6 +101,18 @@ describe("registry integrity", () => {
     expect(requireProvider("vapi").configSchema.safeParse({ phoneNumberId: "pn_1" }).success).toBe(false);
   });
 
+  // A Vapi account with no number provisioned can still drive in-browser test
+  // calls, so requiring a phone number id here would lock that setup out of the
+  // product entirely. `vapiProvider.place` is what refuses a real phone call.
+  it("accepts a Vapi config with no phone number id", () => {
+    const result = requireProvider("vapi").configSchema.safeParse({
+      assistantId: "as_1",
+      webhookSecret: "a-secret-at-least-16-chars",
+      publicKey: "pk_1",
+    });
+    expect(result.success).toBe(true);
+  });
+
   it("rejects a too-short Vapi webhook secret", () => {
     // A weak shared secret is the difference between authenticated call results
     // and anyone who guesses the tunnel URL forging them.

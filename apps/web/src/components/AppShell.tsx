@@ -50,6 +50,7 @@ export const NAV: { section: string; items: NavItem[] }[] = [
       { href: "/approvals", label: "Approvals", ready: true, badge: "approvals" },
       { href: "/inbox", label: "Inbox", ready: true, badge: "inbox" },
       { href: "/calls", label: "Calls", ready: true },
+      { href: "/calls/demo", label: "Test Call", ready: true },
     ],
   },
   {

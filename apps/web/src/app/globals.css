@@ -14,21 +14,21 @@
 :root {
   color-scheme: light;
 
-  --bg: 252 252 253;
+  --bg: 247 245 241;
   --surface: 255 255 255;
   --surface-raised: 255 255 255;
-  --surface-hover: 246 247 248;
+  --surface-hover: 240 237 230;
 
-  --border: 229 231 234;
-  --border-strong: 208 212 217;
+  --border: 225 220 209;
+  --border-strong: 203 196 180;
 
-  --fg: 24 26 29;
-  --fg-muted: 95 101 110;
-  --fg-subtle: 139 146 155;
+  --fg: 25 24 20;
+  --fg-muted: 110 106 96;
+  --fg-subtle: 154 147 132;
 
-  --accent: 47 92 224;
+  --accent: 42 80 200;
   --accent-fg: 255 255 255;
-  --accent-muted: 235 240 253;
+  --accent-muted: 232 236 250;
 
   --ok: 22 128 84;
   --ok-muted: 232 246 238;
@@ -47,21 +47,21 @@
   :root:not([data-theme="light"]) {
     color-scheme: dark;
 
-    --bg: 12 13 15;
-    --surface: 20 21 24;
-    --surface-raised: 26 28 32;
-    --surface-hover: 31 33 38;
+    --bg: 20 19 15;
+    --surface: 29 27 22;
+    --surface-raised: 36 33 27;
+    --surface-hover: 43 40 32;
 
-    --border: 39 42 48;
-    --border-strong: 56 60 68;
+    --border: 46 43 36;
+    --border-strong: 69 63 53;
 
-    --fg: 237 239 242;
-    --fg-muted: 156 163 173;
-    --fg-subtle: 113 120 130;
+    --fg: 237 234 226;
+    --fg-muted: 176 169 155;
+    --fg-subtle: 138 131 117;
 
-    --accent: 106 145 255;
-    --accent-fg: 12 13 15;
-    --accent-muted: 26 33 54;
+    --accent: 138 166 255;
+    --accent-fg: 20 19 15;
+    --accent-muted: 26 32 51;
 
     --ok: 61 190 130;
     --ok-muted: 17 38 30;
@@ -75,21 +75,21 @@
 :root[data-theme="dark"] {
   color-scheme: dark;
 
-  --bg: 12 13 15;
-  --surface: 20 21 24;
-  --surface-raised: 26 28 32;
-  --surface-hover: 31 33 38;
+  --bg: 20 19 15;
+  --surface: 29 27 22;
+  --surface-raised: 36 33 27;
+  --surface-hover: 43 40 32;
 
-  --border: 39 42 48;
-  --border-strong: 56 60 68;
+  --border: 46 43 36;
+  --border-strong: 69 63 53;
 
-  --fg: 237 239 242;
-  --fg-muted: 156 163 173;
-  --fg-subtle: 113 120 130;
+  --fg: 237 234 226;
+  --fg-muted: 176 169 155;
+  --fg-subtle: 138 131 117;
 
-  --accent: 106 145 255;
-  --accent-fg: 12 13 15;
-  --accent-muted: 26 33 54;
+  --accent: 138 166 255;
+  --accent-fg: 20 19 15;
+  --accent-muted: 26 32 51;
 
   --ok: 61 190 130;
   --ok-muted: 17 38 30;
@@ -97,6 +97,40 @@
   --warn-muted: 41 32 16;
   --danger: 240 106 106;
   --danger-muted: 45 22 22;
+}
+
+/* --------------------------------------------------------------------------
+   Fuchesi Calls — the voice module inside Leads.
+
+   Calls is a Fuchesi product in the brochure and a section of this app in the
+   code, so it gets its own accent rather than its own deployable. Scoping the
+   override to a data attribute means only the accent moves; the neutrals, type
+   and components stay identical, which is what makes the two read as one system
+   rather than two apps stitched together.
+
+   Magenta, not the obvious red: the accent marks interactive controls, and a
+   red one would be indistinguishable from the danger state a live call screen
+   very much needs to keep separate.
+   -------------------------------------------------------------------------- */
+
+[data-product="calls"] {
+  --accent: 190 46 122;
+  --accent-fg: 255 255 255;
+  --accent-muted: 250 232 242;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) [data-product="calls"] {
+    --accent: 233 128 186;
+    --accent-fg: 20 19 15;
+    --accent-muted: 48 20 36;
+  }
+}
+
+:root[data-theme="dark"] [data-product="calls"] {
+  --accent: 233 128 186;
+  --accent-fg: 20 19 15;
+  --accent-muted: 48 20 36;
 }
 
 @layer base {

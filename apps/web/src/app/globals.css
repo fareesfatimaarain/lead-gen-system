@@ -99,40 +99,6 @@
   --danger-muted: 45 22 22;
 }
 
-/* --------------------------------------------------------------------------
-   Fuchesi Calls — the voice module inside Leads.
-
-   Calls is a Fuchesi product in the brochure and a section of this app in the
-   code, so it gets its own accent rather than its own deployable. Scoping the
-   override to a data attribute means only the accent moves; the neutrals, type
-   and components stay identical, which is what makes the two read as one system
-   rather than two apps stitched together.
-
-   Magenta, not the obvious red: the accent marks interactive controls, and a
-   red one would be indistinguishable from the danger state a live call screen
-   very much needs to keep separate.
-   -------------------------------------------------------------------------- */
-
-[data-product="calls"] {
-  --accent: 190 46 122;
-  --accent-fg: 255 255 255;
-  --accent-muted: 250 232 242;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) [data-product="calls"] {
-    --accent: 233 128 186;
-    --accent-fg: 20 19 15;
-    --accent-muted: 48 20 36;
-  }
-}
-
-:root[data-theme="dark"] [data-product="calls"] {
-  --accent: 233 128 186;
-  --accent-fg: 20 19 15;
-  --accent-muted: 48 20 36;
-}
-
 @layer base {
   * {
     border-color: rgb(var(--border));

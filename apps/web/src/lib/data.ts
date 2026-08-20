@@ -1244,3 +1244,70 @@ export async function getSourcePerformanceSummary(session: SessionContext) {
       .groupBy(schema.sourcePerformance.source),
   );
 }
+
+// ---------------------------------------------------------------------------
+// Acquisition economics
+// ---------------------------------------------------------------------------
+
+/**
+ * Cost per booked consultation, by source.
+ *
+ * The number a clinic actually buys on. Everything needed to compute it already
+ * lives here — `prospects.source` records where a person came from,
+ * `bookings` records the consultation, and `source_performance` records what the
+ * discovery run cost — but nothing joined them, so the product could report
+ * spend and outcomes separately and never the ratio.
+ *
+ * Costs are attributed to the source that produced the lead. Outreach cost
+ * (model, voice, verification) is not split per prospect: `provider_usage` is
+ * aggregated by provider and period, not by prospect, so apportioning it would
+ * be an invented number. Discovery and enrichment cost is real and per-source,
+ * and is what varies between sources anyway.
+ */
+export async function getAcquisitionBySource(session: SessionContext) {
+  return scope(session, async (tx) => {
+    const p = schema.prospects;
+
+    // One row per source: funnel counts, with bookings joined through the
+    // prospect that produced them.
+    const funnel = await tx
+      .select({
+        source: sql<string>`coalesce(${p.source}, 'unattributed')`,
+        leads: sql<number>`count(distinct ${p.id})::int`,
+        qualified: sql<number>`count(distinct ${p.id}) filter (where ${p.status} not in ('discovered','enriching','enriched','needs_review','disqualified'))::int`,
+        contacted: sql<number>`count(distinct ${p.id}) filter (where ${p.lastContactedAt} is not null)::int`,
+        booked: sql<number>`count(distinct ${schema.bookings.id})::int`,
+      })
+      .from(p)
+      .leftJoin(schema.bookings, eq(schema.bookings.prospectId, p.id))
+      .groupBy(sql`coalesce(${p.source}, 'unattributed')`);
+
+    // Discovery/enrichment spend, per source.
+    const costs = await tx
+      .select({
+        source: schema.sourcePerformance.source,
+        costUsd: sql<string>`coalesce(sum(${schema.sourcePerformance.costUsd}), 0)::text`,
+      })
+      .from(schema.sourcePerformance)
+      .groupBy(schema.sourcePerformance.source);
+
+    const [settings] = await tx
+      .select({ patientValueUsd: schema.settings.patientValueUsd })
+      .from(schema.settings)
+      .where(eq(schema.settings.orgId, session.orgId));
+
+    const costBySource = new Map(costs.map((c) => [c.source, Math.round(Number(c.costUsd) * 100)]));
+
+    return {
+      rows: funnel.map((f) => ({
+        source: f.source,
+        leads: f.leads,
+        qualified: f.qualified,
+        contacted: f.contacted,
+        booked: f.booked,
+        costCents: costBySource.get(f.source) ?? 0,
+      })),
+      patientValueCents: Math.round(Number(settings?.patientValueUsd ?? 0) * 100),
+    };
+  });
+}

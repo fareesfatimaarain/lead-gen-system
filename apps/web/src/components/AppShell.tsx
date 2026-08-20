@@ -30,7 +30,10 @@ export interface NavItem {
 export const NAV: { section: string; items: NavItem[] }[] = [
   {
     section: "Overview",
-    items: [{ href: "/", label: "Dashboard", ready: true }],
+    items: [
+      { href: "/", label: "Dashboard", ready: true },
+      { href: "/acquisition", label: "Acquisition", ready: true },
+    ],
   },
   {
     section: "Audience",

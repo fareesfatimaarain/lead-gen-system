@@ -187,6 +187,18 @@ export const settings = pgTable("settings", {
   monthlySpendCapUsd: numeric("monthly_spend_cap_usd", { precision: 12, scale: 2 }),
   spendHardCutoff: boolean("spend_hard_cutoff").notNull().default(true),
 
+  /**
+   * What one booked consultation is worth. Drives the Acquisition screen, which
+   * is the only place this product answers "is this working" in the currency the
+   * customer thinks in.
+   *
+   * Deliberately nullable with no default: a made-up patient value produces a
+   * confident, wrong ROI, and a clinic quoting 18-month lifetime value and one
+   * quoting first-treatment revenue are answering different questions. The
+   * screen asks for it rather than assuming.
+   */
+  patientValueUsd: numeric("patient_value_usd", { precision: 12, scale: 2 }),
+
   // Compliance
   callRecordingDisclosure: text("call_recording_disclosure"),
   jurisdiction: text("jurisdiction"),

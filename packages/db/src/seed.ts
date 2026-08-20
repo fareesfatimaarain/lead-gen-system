@@ -293,7 +293,7 @@ async function main(): Promise<void> {
         timezone: "America/New_York",
         country: "United States",
         city: "New York",
-        source: "demo_seed",
+        source: "google_places",
       },
       {
         email: "oliver@harborandco.com",
@@ -312,7 +312,7 @@ async function main(): Promise<void> {
         timezone: "Europe/London",
         country: "United Kingdom",
         city: "London",
-        source: "demo_seed",
+        source: "apollo",
       },
       {
         email: "nina@signalforge.ai",
@@ -331,7 +331,7 @@ async function main(): Promise<void> {
         timezone: "America/Los_Angeles",
         country: "United States",
         city: "San Francisco",
-        source: "demo_seed",
+        source: "google_places",
       },
       {
         email: "leah@northpeakstudio.com",
@@ -350,7 +350,7 @@ async function main(): Promise<void> {
         timezone: "America/New_York",
         country: "United States",
         city: "New York",
-        source: "demo_seed",
+        source: "overpass",
       },
     ] as const;
 
@@ -616,7 +616,63 @@ async function main(): Promise<void> {
         latencyMs: 2200,
         ranAt: new Date(Date.now() - 2 * 86400000),
       },
+      // Costs for the sources the seeded prospects actually came from, so the
+      // Acquisition screen has a real cost basis to divide by rather than
+      // ranking every source at zero.
+      {
+        orgId: org.id,
+        icpId: icp.id,
+        source: "google_places",
+        query: "aesthetic clinics dubai marina",
+        leadsReturned: 64,
+        leadsNew: 24,
+        leadsQualified: 11,
+        avgFitScore: "84.00",
+        costUsd: "36.00",
+        latencyMs: 900,
+        ranAt: new Date(Date.now() - 3 * 86400000),
+      },
+      {
+        orgId: org.id,
+        icpId: icp.id,
+        source: "overpass",
+        query: "clinic amenity=doctors dubai",
+        leadsReturned: 41,
+        leadsNew: 15,
+        leadsQualified: 4,
+        avgFitScore: "71.00",
+        costUsd: "0.00",
+        latencyMs: 10200,
+        ranAt: new Date(Date.now() - 4 * 86400000),
+      },
     ]).onConflictDoNothing();
+
+    // Booked consultations. Without these the Acquisition screen is honest and
+    // empty: cost per booked consultation has no numerator, so every source
+    // ranks as unknown and the one number the product exists to report is a
+    // dash. Two bookings against different sources — google_places at $36 and
+    // apollo at $0 — is the smallest set that makes the ranking mean something.
+    const bookingSeed: { email: string; name: string }[] = [
+      { email: "mara@northpeakstudio.com", name: "Mara Chen" },
+      { email: "oliver@harborandco.com", name: "Oliver Reed" },
+    ];
+    await tx
+      .insert(schema.bookings)
+      .values(
+        bookingSeed
+          .filter((b) => prospectMap.has(b.email))
+          .map((b, i) => ({
+            orgId: org.id,
+            prospectId: prospectMap.get(b.email)!,
+            provider: "calcom",
+            providerBookingId: `demo-booking-${i + 1}`,
+            startTime: new Date(Date.now() + (i + 2) * 86400000),
+            attendeeName: b.name,
+            attendeeEmail: b.email,
+            status: "confirmed",
+          })),
+      )
+      .onConflictDoNothing();
   });
 
   console.log(`Seeded ${ORG_NAME}.`);
